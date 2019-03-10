@@ -1,0 +1,13 @@
+.table th {
+    text-align: center;
+}
+
+.table {
+    width: 50%;
+    margin: auto;
+    float: none;
+}
+
+.navbar .navbar-nav{
+    text-align: center;
+}
