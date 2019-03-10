@@ -42,10 +42,14 @@ function includeHTML() {
         file = element.getAttribute("include-html");
         if (file) {
             xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
+            xhttp.onreadystatechange = function () {
                 if (this.readyState === 4) {
-                    if (this.status === 200) {element.innerHTML = this.responseText;}
-                    if (this.status === 404) {element.innerHTML = "Page not found.";}
+                    if (this.status === 200) {
+                        element.innerHTML = this.responseText;
+                    }
+                    if (this.status === 404) {
+                        element.innerHTML = "Page not found.";
+                    }
                     element.removeAttribute("include-html");
                     includeHTML();
                 }
@@ -68,12 +72,149 @@ function includeHTML() {
 })();
 
 function getMatchesStats() {
-    // let result = getMatchesData();
-    // console.log(result);
+    let result;
+
     Ajax.get('https://worldcup.sfg.io/matches', (result) => {
+        let venueSelect = document.querySelector('#venue-select');
+        let countrySelect = document.querySelector('#country-select');
+        let goalsSelect = document.querySelector('#goals-select');
+        let searchButton = document.querySelector('#search-button');
+        let venues = [];
+        let countries = [];
+        result.forEach(function (singleResult) {
+            if (venues.includes(singleResult.venue) === false) {
+                venues.push(singleResult.venue);
+            }
+            if (countries.includes(singleResult.away_team_country) === false) {
+                countries.push(singleResult.away_team_country);
+            }
+            if (countries.includes(singleResult.home_team_country) === false) {
+                countries.push(singleResult.home_team_country);
+            }
+        });
+        venueSelect.options[venueSelect.options.length] = new Option('Select venue', '');
+        venues.forEach(function (venue) {
+            venueSelect.options[venueSelect.options.length] = new Option(venue, venue);
+        });
+
+        venueSelect.addEventListener('change', function () {
+            console.log(venueSelect.value);
+        });
+
+        countrySelect.options[countrySelect.options.length] = new Option('Select country', '');
+        countries.forEach(function (country) {
+            countrySelect.options[countrySelect.options.length] = new Option(country, country);
+        });
+
+        countrySelect.addEventListener('change', function () {
+            console.log(countrySelect.value);
+        });
+
+        searchButton.addEventListener('click', function (event) {
+            let selectedVenue = venueSelect.value;
+            let selectedCountry = countrySelect.value;
+            let numberOfGoals = goalsSelect.value;
+            console.log(isEmpty(selectedVenue));
+            console.log(isEmpty(selectedCountry));
+            console.log(isEmpty(numberOfGoals));
+            console.log(numberOfGoals);
+
+            let searchResult = [];
+            if (
+                isEmpty(selectedVenue) === false &&
+                isEmpty(selectedCountry) === false &&
+                isEmpty(numberOfGoals) === false
+            ) {
+                result.forEach(function (singleResult) {
+                    if (
+                        singleResult.venue == selectedVenue &&
+                        (singleResult.away_team_country == selectedCountry ||
+                            singleResult.home_team_country == selectedCountry) &&
+                        (singleResult.away_team.goals == numberOfGoals ||
+                            singleResult.home_team.goals == numberOfGoals)
+                    ) {
+                        searchResult.push(singleResult);
+                    }
+                })
+            } else if (
+                isEmpty(selectedVenue) === false &&
+                isEmpty(selectedCountry) === false
+            ) {
+                result.forEach(function (singleResult) {
+                    if (
+                        singleResult.venue == selectedVenue &&
+                        (singleResult.away_team_country == selectedCountry ||
+                            singleResult.home_team_country == selectedCountry)
+                    ) {
+                        searchResult.push(singleResult);
+                    }
+                })
+            } else if (
+                isEmpty(selectedCountry) === false &&
+                isEmpty(numberOfGoals) === false
+            ) {
+                result.forEach(function (singleResult) {
+                    if (
+                        (singleResult.away_team_country == selectedCountry ||
+                            singleResult.home_team_country == selectedCountry) &&
+                        (singleResult.away_team.goals == numberOfGoals ||
+                            singleResult.home_team.goals == numberOfGoals)
+                    ) {
+                        searchResult.push(singleResult);
+                    }
+                })
+            } else if (
+                isEmpty(selectedVenue) === false &&
+                isEmpty(numberOfGoals) === false
+            ) {
+                result.forEach(function (singleResult) {
+                    if (
+                        singleResult.venue == selectedVenue &&
+                        (singleResult.away_team.goals == numberOfGoals ||
+                            singleResult.home_team.goals == numberOfGoals)
+                    ) {
+                        searchResult.push(singleResult);
+                    }
+                })
+            } else if (isEmpty(selectedVenue) === false) {
+                result.forEach(function (singleResult) {
+                    if (singleResult.venue == selectedVenue) {
+                        searchResult.push(singleResult);
+                    }
+                });
+                console.log(searchResult);
+            } else if (isEmpty(selectedCountry) === false) {
+                result.forEach(function (singleResult) {
+                    if (
+                        (singleResult.away_team_country == selectedCountry ||
+                            singleResult.home_team_country == selectedCountry)
+                    ) {
+                        searchResult.push(singleResult);
+                    }
+                })
+            } else if (isEmpty(numberOfGoals) === false) {
+                result.forEach(function (singleResult) {
+                    if (
+                        singleResult.away_team.goals == numberOfGoals ||
+                        singleResult.home_team.goals == numberOfGoals
+                    ) {
+                        searchResult.push(singleResult);
+                    }
+                })
+            } else if (isEmpty(selectedVenue) === true &&
+                isEmpty(selectedCountry) === true &&
+                isEmpty(numberOfGoals) === true) {
+                searchResult = result;
+            }
+            let tBody = document.querySelector('tbody');
+            tBody.innerHTML = '';
+            drawMatchesTable(searchResult);
+        });
+
         drawMatchesTable(result);
-        // console.log(data);
+
     });
+
     // let matchesResult = Ajax.get('GET', 'https://worldcup.sfg.io/matches')
     //     .then(function (result) {
     //         console.log(result);
@@ -186,10 +327,10 @@ function drawMatchesTable(result) {
     }
 }
 
-function getMatchesData(){
-    Ajax.get('https://worldcup.sfg.io/matches', (result) => {
-        console.log(result);
-        return result;
-        // console.log(data);
-    });
+function isEmpty(value) {
+    let response = false;
+    if (value === '' || value === undefined || value === null || value === ' ') {
+        response = true;
+    }
+    return response;
 }
