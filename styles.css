@@ -16,7 +16,7 @@
     position: relative;
 }
 
-.form-group{
+.search{
     position: relative;
     float: left;
 }
@@ -24,4 +24,13 @@
 #search-button{
     position: relative;
     float: right;
+}
+
+.hidden{
+    display:none;
+}
+
+#select-country-container{
+    display: flex;
+    justify-content: center;
 }

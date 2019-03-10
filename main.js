@@ -1,18 +1,12 @@
 let Ajax = {
-
     ajax: null,
-
     init() {
-
         if (!this.ajax) {
             this.ajax = new XMLHttpRequest();
         }
-
         return this.ajax;
     },
-
     get(url, callback) {
-
         let request = this.init();
         request.open("GET", url);
         request.send();
@@ -21,7 +15,6 @@ let Ajax = {
             callback(JSON.parse(request.responseText));
         };
     },
-
     post(url, data, callback) {
 
         let request = this.init();
@@ -30,7 +23,6 @@ let Ajax = {
         request.onload = () => {
             callback(JSON.parse(request.responseText));
         };
-
     }
 };
 
@@ -70,9 +62,10 @@ function includeHTML() {
             getTeamDetails();
             break;
         case '/projectjs-fifa-game/group-results-details.html':
-            console.log('test');
             getGroupResultsDetails();
             break;
+        case '/projectjs-fifa-game/country-details.html':
+            getCountryDetails();
         default:
             break;
     }
@@ -217,22 +210,8 @@ function getMatchesStats() {
             tBody.innerHTML = '';
             drawMatchesTable(searchResult);
         });
-
         drawMatchesTable(result);
-
     });
-
-    // let matchesResult = Ajax.get('GET', 'https://worldcup.sfg.io/matches')
-    //     .then(function (result) {
-    //         console.log(result);
-    //         console.log(result.length);
-    //         drawMatchesTable(result);
-    //         // myTableDiv.appendChild(table);
-    //     })
-    //     .catch(function () {
-    //         console.log('error');
-    //     });
-    // // console.log(matchesResult);
 }
 
 function drawMatchesTable(result) {
@@ -335,7 +314,6 @@ function drawMatchesTable(result) {
 }
 
 function getTeamDetails(){
-    // console.log('det');
     Ajax.get('https://worldcup.sfg.io/teams/', (result) => {
         console.log(result);
         drawTeamDetailsTable(result);
@@ -480,6 +458,107 @@ function drawGroupResultsDetailsTable(result) {
             tdOrderedTeamGoalsFor.appendChild(document.createTextNode(result[i].ordered_teams[j].goals_for));
             tr.appendChild(tdOrderedTeamGoalsFor);
         }
+    }
+}
+
+function getCountryDetails(){
+
+    Ajax.get('https://worldcup.sfg.io/teams/', (result) => {
+        // console.log(result);
+        let countryList = [];
+        result.forEach(function (singleResult) {
+            countryList.push({'fifaCode': singleResult.fifa_code, 'country': singleResult.country});
+            // countryList.push({'country': singleResult.country});
+            // countriesList.push(singleResult.fifa_code, singleResult.country);
+            // countriesList[singleResult.fifa_code]
+        });
+        // console.log(countryList);
+        // return result;
+
+        console.log(countryList);
+        // let countryList = getCountryList();
+        let selectCountry = document.querySelector('#select-country');
+        selectCountry.options[selectCountry.options.length] = new Option('Select country', '');
+        for(let i = 0; i < countryList.length; i++){
+            selectCountry.options[selectCountry.options.length] = new Option(countryList[i].country, countryList[i].fifaCode);
+        }
+
+        selectCountry.addEventListener('change', function (event) {
+            if(isEmpty(selectCountry.value) === false){
+                console.log(selectCountry.value);
+                Ajax.get(`https://worldcup.sfg.io/matches/country?fifa_code=${selectCountry.value}`, (countryData) => {
+                    console.log(countryData);
+                    drawCountryDetailsTable(countryData);
+                })
+            } else {
+                let table = document.getElementById('country-details');
+                table.classList.add('hidden');
+            }
+
+        })
+
+
+    });
+
+}
+
+function drawCountryDetailsTable(result){
+    let table = document.getElementById('country-details');
+    table.classList.remove('hidden');
+
+    let tableBody = document.getElementsByTagName('tbody');
+    // console.log(tableBody);
+    let tr = document.createElement('tr');
+    tableBody[0].appendChild(tr);
+    console.log(tableBody);
+
+    for (let i = 0; i < result.length; i++) {
+        let tr = document.createElement('tr');
+        tableBody[0].appendChild(tr);
+
+        let tdDate = document.createElement('td');
+        tdDate.appendChild(document.createTextNode(result[i].datetime.substring(0,10)));
+        tr.appendChild(tdDate);
+
+        let tdVenue = document.createElement('td');
+        tdVenue.appendChild(document.createTextNode(result[i].venue));
+        tr.appendChild(tdVenue);
+
+        let tdLocation = document.createElement('td');
+        tdLocation.appendChild(document.createTextNode(result[i].location));
+        tr.appendChild(tdLocation);
+
+        let tdAttendance = document.createElement('td');
+        tdAttendance.appendChild(document.createTextNode(result[i].attendance));
+        tr.appendChild(tdAttendance);
+
+        let tdHomeTeam = document.createElement('td');
+        tdHomeTeam.appendChild(document.createTextNode(result[i].home_team_country));
+        tr.appendChild(tdHomeTeam);
+
+        let tdAwayTeam = document.createElement('td');
+        tdAwayTeam.appendChild(document.createTextNode(result[i].away_team_country));
+        tr.appendChild(tdAwayTeam);
+
+        let tdWinner = document.createElement('td');
+        tdWinner.appendChild(document.createTextNode(result[i].winner));
+        tr.appendChild(tdWinner);
+
+        let tdWeatherDescription = document.createElement('td');
+        tdWeatherDescription.appendChild(document.createTextNode(result[i].weather.description));
+        tr.appendChild(tdWeatherDescription);
+
+        let tdWindSpeed = document.createElement('td');
+        tdWindSpeed.appendChild(document.createTextNode(result[i].weather.wind_speed));
+        tr.appendChild(tdWindSpeed);
+
+        let tdHumidity = document.createElement('td');
+        tdHumidity.appendChild(document.createTextNode(result[i].weather.humidity));
+        tr.appendChild(tdHumidity);
+
+        let tdTempCelsius = document.createElement('td');
+        tdTempCelsius.appendChild(document.createTextNode(result[i].weather.temp_celsius));
+        tr.appendChild(tdTempCelsius);
     }
 }
 
