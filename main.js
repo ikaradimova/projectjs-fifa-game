@@ -26,6 +26,8 @@ let Ajax = {
     }
 };
 
+let history = [];
+
 function includeHTML() {
     let z, i, element, file, xhttp;
     z = document.getElementsByTagName("*");
@@ -54,6 +56,7 @@ function includeHTML() {
 }
 
 (function () {
+    // localStorage.setItem('history', JSON.stringify({event: 'Index page', date: new Date(Date.now()).toLocaleString()}));
     switch (window.location.pathname) {
         case '/projectjs-fifa-game/matches-stats.html':
             getMatchesStats();
@@ -66,12 +69,31 @@ function includeHTML() {
             break;
         case '/projectjs-fifa-game/country-details.html':
             getCountryDetails();
+            break;
+        case '/projectjs-fifa-game/history.html':
+            getHistory();
+            break;
         default:
             break;
     }
 })();
 
 function getMatchesStats() {
+    history = [];
+    if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
+        // history = [JSON.parse(localStorage.getItem('history'))];
+
+        localStorage.setItem('history', JSON.stringify({
+            action: 'Matches statistics',
+            date: new Date(Date.now()).toLocaleString()
+        }));
+    } else {
+        for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
+            history.push(JSON.parse(localStorage.getItem('history'))[i]);
+        }
+        history.push({action: 'Matches statistics', date: new Date(Date.now()).toLocaleString()});
+        localStorage.setItem('history', JSON.stringify(history));
+    }
     let result;
 
     Ajax.get('https://worldcup.sfg.io/matches', (result) => {
@@ -114,6 +136,11 @@ function getMatchesStats() {
             let selectedVenue = venueSelect.value;
             let selectedCountry = countrySelect.value;
             let numberOfGoals = goalsSelect.value;
+            history.push({
+                action: `Search venue=${selectedVenue}, country=${selectedCountry}, numGoals=${numberOfGoals}`,
+                date: new Date(Date.now()).toLocaleString()
+            });
+            localStorage.setItem('history', JSON.stringify(history));
             console.log(isEmpty(selectedVenue));
             console.log(isEmpty(selectedCountry));
             console.log(isEmpty(numberOfGoals));
@@ -313,14 +340,33 @@ function drawMatchesTable(result) {
     }
 }
 
-function getTeamDetails(){
+function getTeamDetails() {
+    history = [];
+    if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
+        // history = [JSON.parse(localStorage.getItem('history'))];
+
+        localStorage.setItem('history', JSON.stringify({
+            action: 'Team details',
+            date: new Date(Date.now()).toLocaleString()
+        }));
+    } else {
+        for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
+            history.push(JSON.parse(localStorage.getItem('history'))[i]);
+        }
+        history.push({action: 'Team details', date: new Date(Date.now()).toLocaleString()});
+        localStorage.setItem('history', JSON.stringify(history));
+    }
+    // history = [JSON.parse(localStorage.getItem('history'))];
+    // history.push({event: 'Team details', date: new Date(Date.now()).toLocaleString()});
+    // console.log(history);
+    // localStorage.setItem('history', JSON.stringify(history));
     Ajax.get('https://worldcup.sfg.io/teams/', (result) => {
         console.log(result);
         drawTeamDetailsTable(result);
     });
 }
 
-function drawTeamDetailsTable(result){
+function drawTeamDetailsTable(result) {
     let table = document.getElementById('team-details');
 
     let tableBody = document.getElementsByTagName('tbody');
@@ -355,7 +401,30 @@ function drawTeamDetailsTable(result){
     }
 }
 
-function getGroupResultsDetails(){
+function getGroupResultsDetails() {
+    history = [];
+    if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
+        // history = [JSON.parse(localStorage.getItem('history'))];
+
+        localStorage.setItem('history', JSON.stringify({
+            action: 'Group results details',
+            date: new Date(Date.now()).toLocaleString()
+        }));
+    } else {
+        for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
+            history.push(JSON.parse(localStorage.getItem('history'))[i]);
+        }
+        history.push({action: 'Group results details', date: new Date(Date.now()).toLocaleString()});
+        localStorage.setItem('history', JSON.stringify(history));
+    }
+    // history.push(JSON.parse(localStorage.getItem('history')));
+    // console.log(history);
+    // history.push({
+    //     event: 'Group results details',
+    //     date: new Date(Date.now()).toLocaleString()
+    // });
+    // console.log(history);
+    // localStorage.setItem('history', JSON.stringify(history));
     Ajax.get('https://worldcup.sfg.io/teams/group_results', (result) => {
         console.log(result);
         drawGroupResultsDetailsTable(result);
@@ -402,7 +471,7 @@ function drawGroupResultsDetailsTable(result) {
             let tr = document.createElement('tr');
             tableBody[0].appendChild(tr);
 
-            if(j === 0){
+            if (j === 0) {
                 let tdId = document.createElement('td');
                 tdId.setAttribute('rowSpan', '4');
                 tdId.appendChild(document.createTextNode(result[i].id));
@@ -461,30 +530,45 @@ function drawGroupResultsDetailsTable(result) {
     }
 }
 
-function getCountryDetails(){
+function getCountryDetails() {
+    history = [];
+    if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
+        // history = [JSON.parse(localStorage.getItem('history'))];
+
+        localStorage.setItem('history', JSON.stringify({
+            action: 'Country details',
+            date: new Date(Date.now()).toLocaleString()
+        }));
+    } else {
+        for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
+            history.push(JSON.parse(localStorage.getItem('history'))[i]);
+        }
+        history.push({action: 'Country details', date: new Date(Date.now()).toLocaleString()});
+        localStorage.setItem('history', JSON.stringify(history));
+    }
 
     Ajax.get('https://worldcup.sfg.io/teams/', (result) => {
         // console.log(result);
         let countryList = [];
         result.forEach(function (singleResult) {
             countryList.push({'fifaCode': singleResult.fifa_code, 'country': singleResult.country});
-            // countryList.push({'country': singleResult.country});
-            // countriesList.push(singleResult.fifa_code, singleResult.country);
-            // countriesList[singleResult.fifa_code]
         });
-        // console.log(countryList);
-        // return result;
 
         console.log(countryList);
         // let countryList = getCountryList();
         let selectCountry = document.querySelector('#select-country');
         selectCountry.options[selectCountry.options.length] = new Option('Select country', '');
-        for(let i = 0; i < countryList.length; i++){
+        for (let i = 0; i < countryList.length; i++) {
             selectCountry.options[selectCountry.options.length] = new Option(countryList[i].country, countryList[i].fifaCode);
         }
 
         selectCountry.addEventListener('change', function (event) {
-            if(isEmpty(selectCountry.value) === false){
+            if (isEmpty(selectCountry.value) === false) {
+                // for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
+                //     history.push(JSON.parse(localStorage.getItem('history'))[i]);
+                // }
+                history.push({action: `Search country fifa_code=${selectCountry.value}`, date: new Date(Date.now()).toLocaleString()});
+                localStorage.setItem('history', JSON.stringify(history));
                 console.log(selectCountry.value);
                 Ajax.get(`https://worldcup.sfg.io/matches/country?fifa_code=${selectCountry.value}`, (countryData) => {
                     console.log(countryData);
@@ -502,7 +586,7 @@ function getCountryDetails(){
 
 }
 
-function drawCountryDetailsTable(result){
+function drawCountryDetailsTable(result) {
     let table = document.getElementById('country-details');
     table.classList.remove('hidden');
 
@@ -517,7 +601,7 @@ function drawCountryDetailsTable(result){
         tableBody[0].appendChild(tr);
 
         let tdDate = document.createElement('td');
-        tdDate.appendChild(document.createTextNode(result[i].datetime.substring(0,10)));
+        tdDate.appendChild(document.createTextNode(result[i].datetime.substring(0, 10)));
         tr.appendChild(tdDate);
 
         let tdVenue = document.createElement('td');
@@ -559,6 +643,51 @@ function drawCountryDetailsTable(result){
         let tdTempCelsius = document.createElement('td');
         tdTempCelsius.appendChild(document.createTextNode(result[i].weather.temp_celsius));
         tr.appendChild(tdTempCelsius);
+    }
+}
+
+function getHistory(){
+    history = [];
+    if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
+        // history = [JSON.parse(localStorage.getItem('history'))];
+
+        localStorage.setItem('history', JSON.stringify({
+            action: 'History visited',
+            date: new Date(Date.now()).toLocaleString()
+        }));
+    } else {
+        for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
+            history.push(JSON.parse(localStorage.getItem('history'))[i]);
+        }
+        history.push({action: 'History visited', date: new Date(Date.now()).toLocaleString()});
+        localStorage.setItem('history', JSON.stringify(history));
+    }
+
+    console.log(JSON.parse(localStorage.getItem('history')));
+    drawHistoryTable(JSON.parse(localStorage.getItem('history')));
+}
+
+function drawHistoryTable(result){
+    let table = document.getElementById('history');
+
+    let tableBody = document.getElementsByTagName('tbody');
+    // console.log(tableBody);
+    let tr = document.createElement('tr');
+    tableBody[0].appendChild(tr);
+    console.log(tableBody);
+
+    for (let i = 0; i < result.length; i++) {
+        console.log(result);
+        let tr = document.createElement('tr');
+        tableBody[0].appendChild(tr);
+
+        let tdAction = document.createElement('td');
+        tdAction.appendChild(document.createTextNode(result[i].action));
+        tr.appendChild(tdAction);
+
+        let tdDate = document.createElement('td');
+        tdDate.appendChild(document.createTextNode(result[i].date));
+        tr.appendChild(tdDate);
     }
 }
 
