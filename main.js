@@ -66,6 +66,13 @@ function includeHTML() {
         case '/projectjs-fifa-game/matches-stats.html':
             getMatchesStats();
             break;
+        case '/projectjs-fifa-game/team-details.html':
+            getTeamDetails();
+            break;
+        case '/projectjs-fifa-game/group-results-details.html':
+            console.log('test');
+            getGroupResultsDetails();
+            break;
         default:
             break;
     }
@@ -324,6 +331,155 @@ function drawMatchesTable(result) {
         let tdAwayTeamPassAccuracy = document.createElement('td');
         tdAwayTeamPassAccuracy.appendChild(document.createTextNode(result[i].away_team_statistics.pass_accuracy + '%'));
         tr.appendChild(tdAwayTeamPassAccuracy);
+    }
+}
+
+function getTeamDetails(){
+    // console.log('det');
+    Ajax.get('https://worldcup.sfg.io/teams/', (result) => {
+        console.log(result);
+        drawTeamDetailsTable(result);
+    });
+}
+
+function drawTeamDetailsTable(result){
+    let table = document.getElementById('team-details');
+
+    let tableBody = document.getElementsByTagName('tbody');
+    // console.log(tableBody);
+    let tr = document.createElement('tr');
+    tableBody[0].appendChild(tr);
+    console.log(tableBody);
+
+    for (let i = 0; i < result.length; i++) {
+        let tr = document.createElement('tr');
+        tableBody[0].appendChild(tr);
+
+        let tdId = document.createElement('td');
+        tdId.appendChild(document.createTextNode(result[i].id));
+        tr.appendChild(tdId);
+
+        let tdGroupId = document.createElement('td');
+        tdGroupId.appendChild(document.createTextNode(result[i].group_id));
+        tr.appendChild(tdGroupId);
+
+        let tdGroupLetter = document.createElement('td');
+        tdGroupLetter.appendChild(document.createTextNode(result[i].group_letter));
+        tr.appendChild(tdGroupLetter);
+
+        let tdFifaCode = document.createElement('td');
+        tdFifaCode.appendChild(document.createTextNode(result[i].fifa_code));
+        tr.appendChild(tdFifaCode);
+
+        let tdCountry = document.createElement('td');
+        tdCountry.appendChild(document.createTextNode(result[i].country));
+        tr.appendChild(tdCountry);
+    }
+}
+
+function getGroupResultsDetails(){
+    Ajax.get('https://worldcup.sfg.io/teams/group_results', (result) => {
+        console.log(result);
+        drawGroupResultsDetailsTable(result);
+    });
+}
+
+function drawGroupResultsDetailsTable(result) {
+    console.log(result);
+    // let body = document.body;
+    // let table = document.createElement('table');
+    // body.appendChild(table);
+    // let tableHead = document.createElement('thead');
+    // table.appendChild(tableHead);
+    // let tr1 = document.createElement('tr');
+    // table.appendChild(tr1);
+    // let thd = document.createElement('th');
+    // console.log(thd);
+    // // thd.setAttribute('scope', 'col');
+    // // thd.setAttribute('colspan', '3');
+    // let thdText = thd.appendChild(document.createTextNode(''));
+    // tr1.appendChild(thdText);
+    // let thdHomeTeam = document.createElement('th');
+    // // thdHomeTeam.setAttribute('scope', 'col');
+    // // thdHomeTeam.setAttribute('colspan', '3');
+    // tr1.appendChild(thdHomeTeam.appendChild(document.createTextNode('Home team')));
+    // let thdAwayTeam = document.createElement('th');
+    // // thdAwayTeam.setAttribute('scope', 'col');
+    // // thdAwayTeam.setAttribute('colspan', '3');
+    // tr1.appendChild(thdAwayTeam.appendChild(document.createTextNode('Away team')));
+    // // th1.appendChild(document.createElement('td').setAttribute('scope', 'col').setAttribute('colspan', '3').appendChild(document.createTextNode('Home team')));
+    // // th1.appendChild(document.createElement('td  scope="col" colspan="3"').appendChild(document.createTextNode('Away team')));
+    let table = document.getElementById('group-results-details');
+
+    let tableBody = document.getElementsByTagName('tbody');
+    // console.log(tableBody);
+    let tr = document.createElement('tr');
+    tableBody[0].appendChild(tr);
+    console.log(tableBody);
+
+    for (let i = 0; i < result.length; i++) {
+
+        for (let j = 0; j < result[i].ordered_teams.length; j++) {
+            // let i = 0;
+            let tr = document.createElement('tr');
+            tableBody[0].appendChild(tr);
+
+            if(j === 0){
+                let tdId = document.createElement('td');
+                tdId.setAttribute('rowSpan', '4');
+                tdId.appendChild(document.createTextNode(result[i].id));
+                tr.appendChild(tdId);
+
+                let tdLetter = document.createElement('td');
+                tdLetter.setAttribute('rowSpan', '4');
+                tdLetter.appendChild(document.createTextNode(result[i].letter));
+                tr.appendChild(tdLetter);
+            }
+
+            let tdOrderedTeamId = document.createElement('td');
+            tdOrderedTeamId.appendChild(document.createTextNode(result[i].ordered_teams[j].id));
+            tr.appendChild(tdOrderedTeamId);
+
+            let tdOrderedTeamFifaCode = document.createElement('td');
+            tdOrderedTeamFifaCode.appendChild(document.createTextNode(result[i].ordered_teams[j].fifa_code));
+            tr.appendChild(tdOrderedTeamFifaCode);
+
+            let tdOrderedTeamCountry = document.createElement('td');
+            tdOrderedTeamCountry.appendChild(document.createTextNode(result[i].ordered_teams[j].country));
+            tr.appendChild(tdOrderedTeamCountry);
+
+            let tdOrderedTeamPoints = document.createElement('td');
+            tdOrderedTeamPoints.appendChild(document.createTextNode(result[i].ordered_teams[j].points));
+            tr.appendChild(tdOrderedTeamPoints);
+
+            let tdOrderedTeamWins = document.createElement('td');
+            tdOrderedTeamWins.appendChild(document.createTextNode(result[i].ordered_teams[j].wins));
+            tr.appendChild(tdOrderedTeamWins);
+
+            let tdOrderedTeamLosses = document.createElement('td');
+            tdOrderedTeamLosses.appendChild(document.createTextNode(result[i].ordered_teams[j].losses));
+            tr.appendChild(tdOrderedTeamLosses);
+
+            let tdOrderedTeamDraws = document.createElement('td');
+            tdOrderedTeamDraws.appendChild(document.createTextNode(result[i].ordered_teams[j].draws));
+            tr.appendChild(tdOrderedTeamDraws);
+
+            let tdOrderedTeamGamesPlayed = document.createElement('td');
+            tdOrderedTeamGamesPlayed.appendChild(document.createTextNode(result[i].ordered_teams[j].games_played));
+            tr.appendChild(tdOrderedTeamGamesPlayed);
+
+            let tdOrderedTeamGoalDifferential = document.createElement('td');
+            tdOrderedTeamGoalDifferential.appendChild(document.createTextNode(result[i].ordered_teams[j].goal_differential));
+            tr.appendChild(tdOrderedTeamGoalDifferential);
+
+            let tdOrderedTeamGoalsAgainst = document.createElement('td');
+            tdOrderedTeamGoalsAgainst.appendChild(document.createTextNode(result[i].ordered_teams[j].goals_against));
+            tr.appendChild(tdOrderedTeamGoalsAgainst);
+
+            let tdOrderedTeamGoalsFor = document.createElement('td');
+            tdOrderedTeamGoalsFor.appendChild(document.createTextNode(result[i].ordered_teams[j].goals_for));
+            tr.appendChild(tdOrderedTeamGoalsFor);
+        }
     }
 }
 
