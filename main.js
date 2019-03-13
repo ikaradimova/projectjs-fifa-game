@@ -1,3 +1,4 @@
+/** Ajax wrapper */
 let Ajax = {
     ajax: null,
     init() {
@@ -11,7 +12,6 @@ let Ajax = {
         request.open("GET", url);
         request.send();
         request.onload = () => {
-            // console.log(request.statusCode);
             callback(JSON.parse(request.responseText));
         };
     },
@@ -28,6 +28,7 @@ let Ajax = {
 
 let history = [];
 
+/** Function for including html in html files */
 function includeHTML() {
     let z, i, element, file, xhttp;
     z = document.getElementsByTagName("*");
@@ -55,22 +56,22 @@ function includeHTML() {
     }
 }
 
+/** Function for redirecting to different functions depending on the uri */
 (function () {
-    // localStorage.setItem('history', JSON.stringify({event: 'Index page', date: new Date(Date.now()).toLocaleString()}));
     switch (window.location.pathname) {
-        case '/projectjs-fifa-game/matches-stats.html':
+        case '/projectjs-fifa-game/matches-stats.html': // matches stats
             getMatchesStats();
             break;
-        case '/projectjs-fifa-game/team-details.html':
+        case '/projectjs-fifa-game/team-details.html': // team details
             getTeamDetails();
             break;
-        case '/projectjs-fifa-game/group-results-details.html':
+        case '/projectjs-fifa-game/group-results-details.html': // group results details
             getGroupResultsDetails();
             break;
-        case '/projectjs-fifa-game/country-details.html':
+        case '/projectjs-fifa-game/country-details.html': // country details
             getCountryDetails();
             break;
-        case '/projectjs-fifa-game/history.html':
+        case '/projectjs-fifa-game/history.html': // history page
             getHistory();
             break;
         default:
@@ -78,31 +79,38 @@ function includeHTML() {
     }
 })();
 
+/** Function for fetching matches stats data */
 function getMatchesStats() {
+    /** saving new data about current action in localStorage */
     history = [];
+    /** checking if localStorage is empty */
     if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
-        // history = [JSON.parse(localStorage.getItem('history'))];
-
+        /** if empty pushes first value */
         localStorage.setItem('history', JSON.stringify({
             action: 'Matches statistics',
             date: new Date(Date.now()).toLocaleString()
         }));
     } else {
+        /** if value not empty get what is inside localStorage, adds new action and pushes the new data in localStorage */
         for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
             history.push(JSON.parse(localStorage.getItem('history'))[i]);
         }
         history.push({action: 'Matches statistics', date: new Date(Date.now()).toLocaleString()});
         localStorage.setItem('history', JSON.stringify(history));
     }
-    let result;
+    // let result;
 
-    Ajax.get('https://worldcup.sfg.io/matches', (result) => {
+    /** fetching data */
+    Ajax.get('http://worldcup.sfg.io/matches', (result) => {
         let venueSelect = document.querySelector('#venue-select');
         let countrySelect = document.querySelector('#country-select');
         let goalsSelect = document.querySelector('#goals-select');
         let searchButton = document.querySelector('#search-button');
+        /** variable for collecting all venues in order to display them in the select */
         let venues = [];
+        /** variable for collecting all possible countries (both away and home teams) in order to display them in the select */
         let countries = [];
+        /** gets non repetitive values */
         result.forEach(function (singleResult) {
             if (venues.includes(singleResult.venue) === false) {
                 venues.push(singleResult.venue);
@@ -114,38 +122,32 @@ function getMatchesStats() {
                 countries.push(singleResult.home_team_country);
             }
         });
+        /** filling venue select with venue values */
         venueSelect.options[venueSelect.options.length] = new Option('Select venue', '');
         venues.forEach(function (venue) {
             venueSelect.options[venueSelect.options.length] = new Option(venue, venue);
         });
 
-        venueSelect.addEventListener('change', function () {
-            console.log(venueSelect.value);
-        });
-
+        /** filling country select with country values */
         countrySelect.options[countrySelect.options.length] = new Option('Select country', '');
         countries.forEach(function (country) {
             countrySelect.options[countrySelect.options.length] = new Option(country, country);
         });
 
-        countrySelect.addEventListener('change', function () {
-            console.log(countrySelect.value);
-        });
-
+        /** adding on click event that triggers search */
         searchButton.addEventListener('click', function (event) {
+            /** getting values to filter by */
             let selectedVenue = venueSelect.value;
             let selectedCountry = countrySelect.value;
             let numberOfGoals = goalsSelect.value;
+            /** adding action about what is searched in localStorage */
             history.push({
                 action: `Search venue=${selectedVenue}, country=${selectedCountry}, numGoals=${numberOfGoals}`,
                 date: new Date(Date.now()).toLocaleString()
             });
             localStorage.setItem('history', JSON.stringify(history));
-            console.log(isEmpty(selectedVenue));
-            console.log(isEmpty(selectedCountry));
-            console.log(isEmpty(numberOfGoals));
-            console.log(numberOfGoals);
 
+            /** search logic */
             let searchResult = [];
             if (
                 isEmpty(selectedVenue) === false &&
@@ -209,7 +211,6 @@ function getMatchesStats() {
                         searchResult.push(singleResult);
                     }
                 });
-                console.log(searchResult);
             } else if (isEmpty(selectedCountry) === false) {
                 result.forEach(function (singleResult) {
                     if (
@@ -231,53 +232,33 @@ function getMatchesStats() {
             } else if (isEmpty(selectedVenue) === true &&
                 isEmpty(selectedCountry) === true &&
                 isEmpty(numberOfGoals) === true) {
+                /** if no search values returns all results as there is nothing to be filtered by */
                 searchResult = result;
             }
+            /** clears table body */
             let tBody = document.querySelector('tbody');
             tBody.innerHTML = '';
+            /** drawing table with filtered results */
             drawMatchesTable(searchResult);
         });
+        /** drawing table with original results */
         drawMatchesTable(result);
     });
 }
 
+/** Function for drawing matches stats table */
 function drawMatchesTable(result) {
-    console.log(result);
-    // let body = document.body;
-    // let table = document.createElement('table');
-    // body.appendChild(table);
-    // let tableHead = document.createElement('thead');
-    // table.appendChild(tableHead);
-    // let tr1 = document.createElement('tr');
-    // table.appendChild(tr1);
-    // let thd = document.createElement('th');
-    // console.log(thd);
-    // // thd.setAttribute('scope', 'col');
-    // // thd.setAttribute('colspan', '3');
-    // let thdText = thd.appendChild(document.createTextNode(''));
-    // tr1.appendChild(thdText);
-    // let thdHomeTeam = document.createElement('th');
-    // // thdHomeTeam.setAttribute('scope', 'col');
-    // // thdHomeTeam.setAttribute('colspan', '3');
-    // tr1.appendChild(thdHomeTeam.appendChild(document.createTextNode('Home team')));
-    // let thdAwayTeam = document.createElement('th');
-    // // thdAwayTeam.setAttribute('scope', 'col');
-    // // thdAwayTeam.setAttribute('colspan', '3');
-    // tr1.appendChild(thdAwayTeam.appendChild(document.createTextNode('Away team')));
-    // // th1.appendChild(document.createElement('td').setAttribute('scope', 'col').setAttribute('colspan', '3').appendChild(document.createTextNode('Home team')));
-    // // th1.appendChild(document.createElement('td  scope="col" colspan="3"').appendChild(document.createTextNode('Away team')));
     let table = document.getElementById('matched-stats');
-
     let tableBody = document.getElementsByTagName('tbody');
-    // console.log(tableBody);
     let tr = document.createElement('tr');
     tableBody[0].appendChild(tr);
-    console.log(tableBody);
 
     for (let i = 0; i < result.length; i++) {
+        /** adding new table row for each result */
         let tr = document.createElement('tr');
         tableBody[0].appendChild(tr);
 
+        /** adding cells */
         let tdFifaId = document.createElement('td');
         tdFifaId.appendChild(document.createTextNode(result[i].fifa_id));
         tr.appendChild(tdFifaId);
@@ -340,45 +321,46 @@ function drawMatchesTable(result) {
     }
 }
 
+/** Function for fetching team details data */
 function getTeamDetails() {
+    /** saving new data about current action in localStorage */
     history = [];
+    /** checking if localStorage is empty */
     if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
-        // history = [JSON.parse(localStorage.getItem('history'))];
-
+        /** if empty pushes first value */
         localStorage.setItem('history', JSON.stringify({
             action: 'Team details',
             date: new Date(Date.now()).toLocaleString()
         }));
     } else {
+        /** if value not empty get what is inside localStorage, adds new action and pushes the new data in localStorage */
         for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
             history.push(JSON.parse(localStorage.getItem('history'))[i]);
         }
         history.push({action: 'Team details', date: new Date(Date.now()).toLocaleString()});
         localStorage.setItem('history', JSON.stringify(history));
     }
-    // history = [JSON.parse(localStorage.getItem('history'))];
-    // history.push({event: 'Team details', date: new Date(Date.now()).toLocaleString()});
-    // console.log(history);
-    // localStorage.setItem('history', JSON.stringify(history));
-    Ajax.get('https://worldcup.sfg.io/teams/', (result) => {
-        console.log(result);
+
+    /** fetching data */
+    Ajax.get('http://worldcup.sfg.io/teams/', (result) => {
+        /** filling table with data */
         drawTeamDetailsTable(result);
     });
 }
 
+/** Function for drawing team details table */
 function drawTeamDetailsTable(result) {
     let table = document.getElementById('team-details');
-
     let tableBody = document.getElementsByTagName('tbody');
-    // console.log(tableBody);
     let tr = document.createElement('tr');
     tableBody[0].appendChild(tr);
-    console.log(tableBody);
 
     for (let i = 0; i < result.length; i++) {
+        /** adding new table row for each result */
         let tr = document.createElement('tr');
         tableBody[0].appendChild(tr);
 
+        /** adding cells */
         let tdId = document.createElement('td');
         tdId.appendChild(document.createTextNode(result[i].id));
         tr.appendChild(tdId);
@@ -401,76 +383,50 @@ function drawTeamDetailsTable(result) {
     }
 }
 
+/** Function for fetching group results details data */
 function getGroupResultsDetails() {
+    /** saving new data about current action in localStorage */
     history = [];
+    /** checking if localStorage is empty */
     if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
-        // history = [JSON.parse(localStorage.getItem('history'))];
-
+        /** if empty pushes first value */
         localStorage.setItem('history', JSON.stringify({
             action: 'Group results details',
             date: new Date(Date.now()).toLocaleString()
         }));
     } else {
+        /** if value not empty get what is inside localStorage, adds new action and pushes the new data in localStorage */
         for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
             history.push(JSON.parse(localStorage.getItem('history'))[i]);
         }
         history.push({action: 'Group results details', date: new Date(Date.now()).toLocaleString()});
         localStorage.setItem('history', JSON.stringify(history));
     }
-    // history.push(JSON.parse(localStorage.getItem('history')));
-    // console.log(history);
-    // history.push({
-    //     event: 'Group results details',
-    //     date: new Date(Date.now()).toLocaleString()
-    // });
-    // console.log(history);
-    // localStorage.setItem('history', JSON.stringify(history));
-    Ajax.get('https://worldcup.sfg.io/teams/group_results', (result) => {
-        console.log(result);
+
+    /** fetching data */
+    Ajax.get('http://worldcup.sfg.io/teams/group_results', (result) => {
+        /** filling table with data */
         drawGroupResultsDetailsTable(result);
     });
 }
 
+/** Function for drawing group results details table */
 function drawGroupResultsDetailsTable(result) {
-    console.log(result);
-    // let body = document.body;
-    // let table = document.createElement('table');
-    // body.appendChild(table);
-    // let tableHead = document.createElement('thead');
-    // table.appendChild(tableHead);
-    // let tr1 = document.createElement('tr');
-    // table.appendChild(tr1);
-    // let thd = document.createElement('th');
-    // console.log(thd);
-    // // thd.setAttribute('scope', 'col');
-    // // thd.setAttribute('colspan', '3');
-    // let thdText = thd.appendChild(document.createTextNode(''));
-    // tr1.appendChild(thdText);
-    // let thdHomeTeam = document.createElement('th');
-    // // thdHomeTeam.setAttribute('scope', 'col');
-    // // thdHomeTeam.setAttribute('colspan', '3');
-    // tr1.appendChild(thdHomeTeam.appendChild(document.createTextNode('Home team')));
-    // let thdAwayTeam = document.createElement('th');
-    // // thdAwayTeam.setAttribute('scope', 'col');
-    // // thdAwayTeam.setAttribute('colspan', '3');
-    // tr1.appendChild(thdAwayTeam.appendChild(document.createTextNode('Away team')));
-    // // th1.appendChild(document.createElement('td').setAttribute('scope', 'col').setAttribute('colspan', '3').appendChild(document.createTextNode('Home team')));
-    // // th1.appendChild(document.createElement('td  scope="col" colspan="3"').appendChild(document.createTextNode('Away team')));
     let table = document.getElementById('group-results-details');
-
     let tableBody = document.getElementsByTagName('tbody');
-    // console.log(tableBody);
     let tr = document.createElement('tr');
     tableBody[0].appendChild(tr);
-    console.log(tableBody);
 
+    /** getting all rows */
     for (let i = 0; i < result.length; i++) {
 
+        /** getting rows for each group */
         for (let j = 0; j < result[i].ordered_teams.length; j++) {
-            // let i = 0;
+            /** adding new row */
             let tr = document.createElement('tr');
             tableBody[0].appendChild(tr);
 
+            /** merging id and letter for each group */
             if (j === 0) {
                 let tdId = document.createElement('td');
                 tdId.setAttribute('rowSpan', '4');
@@ -483,6 +439,7 @@ function drawGroupResultsDetailsTable(result) {
                 tr.appendChild(tdLetter);
             }
 
+            /** creating other cells */
             let tdOrderedTeamId = document.createElement('td');
             tdOrderedTeamId.appendChild(document.createTextNode(result[i].ordered_teams[j].id));
             tr.appendChild(tdOrderedTeamId);
@@ -530,16 +487,19 @@ function drawGroupResultsDetailsTable(result) {
     }
 }
 
+/** Function for fetching country details data */
 function getCountryDetails() {
+    /** saving new data about current action in localStorage */
     history = [];
+    /** checking if localStorage is empty */
     if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
-        // history = [JSON.parse(localStorage.getItem('history'))];
-
+        /** if empty pushes first value */
         localStorage.setItem('history', JSON.stringify({
             action: 'Country details',
             date: new Date(Date.now()).toLocaleString()
         }));
     } else {
+        /** if value not empty get what is inside localStorage, adds new action and pushes the new data in localStorage */
         for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
             history.push(JSON.parse(localStorage.getItem('history'))[i]);
         }
@@ -547,59 +507,56 @@ function getCountryDetails() {
         localStorage.setItem('history', JSON.stringify(history));
     }
 
-    Ajax.get('https://worldcup.sfg.io/teams/', (result) => {
-        // console.log(result);
+    /** fetching teams data in order to get country name and fifaCode */
+    Ajax.get('http://worldcup.sfg.io/teams/', (result) => {
+        /** storing fifaCode and country name for all countries */
         let countryList = [];
         result.forEach(function (singleResult) {
             countryList.push({'fifaCode': singleResult.fifa_code, 'country': singleResult.country});
         });
 
-        console.log(countryList);
-        // let countryList = getCountryList();
         let selectCountry = document.querySelector('#select-country');
+        /** pushing country data into select */
         selectCountry.options[selectCountry.options.length] = new Option('Select country', '');
         for (let i = 0; i < countryList.length; i++) {
             selectCountry.options[selectCountry.options.length] = new Option(countryList[i].country, countryList[i].fifaCode);
         }
 
+        /** adding on change event listener on the select to filter data for country */
         selectCountry.addEventListener('change', function (event) {
+            /** checking if value is selected */
             if (isEmpty(selectCountry.value) === false) {
-                // for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
-                //     history.push(JSON.parse(localStorage.getItem('history'))[i]);
-                // }
+                /** adding new action to localStorage */
                 history.push({action: `Search country fifa_code=${selectCountry.value}`, date: new Date(Date.now()).toLocaleString()});
                 localStorage.setItem('history', JSON.stringify(history));
-                console.log(selectCountry.value);
-                Ajax.get(`https://worldcup.sfg.io/matches/country?fifa_code=${selectCountry.value}`, (countryData) => {
-                    console.log(countryData);
+                /** fetching data for country */
+                Ajax.get(`http://worldcup.sfg.io/matches/country?fifa_code=${selectCountry.value}`, (countryData) => {
+                    /** filling table with data */
                     drawCountryDetailsTable(countryData);
                 })
             } else {
+                /** if no value selected shows nothing */
                 let table = document.getElementById('country-details');
                 table.classList.add('hidden');
             }
-
         })
-
-
     });
-
 }
 
+/** Function for drawing country details table */
 function drawCountryDetailsTable(result) {
     let table = document.getElementById('country-details');
     table.classList.remove('hidden');
-
     let tableBody = document.getElementsByTagName('tbody');
-    // console.log(tableBody);
     let tr = document.createElement('tr');
     tableBody[0].appendChild(tr);
-    console.log(tableBody);
 
     for (let i = 0; i < result.length; i++) {
+        /** adding new table row for each result */
         let tr = document.createElement('tr');
         tableBody[0].appendChild(tr);
 
+        /** adding cells */
         let tdDate = document.createElement('td');
         tdDate.appendChild(document.createTextNode(result[i].datetime.substring(0, 10)));
         tr.appendChild(tdDate);
@@ -646,41 +603,44 @@ function drawCountryDetailsTable(result) {
     }
 }
 
+/** Function for showing history */
 function getHistory(){
-    history = [];
-    if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
-        // history = [JSON.parse(localStorage.getItem('history'))];
 
+    /** filling history table with data before saving action in localStorage, so it will show next time we visit history */
+    drawHistoryTable(JSON.parse(localStorage.getItem('history')));
+
+    /** saving new data about current action in localStorage */
+    history = [];
+    /** checking if localStorage is empty */
+    if (localStorage.getItem('history') == null || localStorage.getItem('history') === '[]') {
+        /** if empty pushes first value */
         localStorage.setItem('history', JSON.stringify({
             action: 'History visited',
             date: new Date(Date.now()).toLocaleString()
         }));
     } else {
+        /** if value not empty get what is inside localStorage, adds new action and pushes the new data in localStorage */
         for (let i = 0; i < JSON.parse(localStorage.getItem('history')).length; i++) {
             history.push(JSON.parse(localStorage.getItem('history'))[i]);
         }
         history.push({action: 'History visited', date: new Date(Date.now()).toLocaleString()});
         localStorage.setItem('history', JSON.stringify(history));
     }
-
-    console.log(JSON.parse(localStorage.getItem('history')));
-    drawHistoryTable(JSON.parse(localStorage.getItem('history')));
 }
 
+/** Function for drawing history table */
 function drawHistoryTable(result){
     let table = document.getElementById('history');
-
     let tableBody = document.getElementsByTagName('tbody');
-    // console.log(tableBody);
     let tr = document.createElement('tr');
     tableBody[0].appendChild(tr);
-    console.log(tableBody);
 
     for (let i = 0; i < result.length; i++) {
-        console.log(result);
+        /** adding new table row for each result */
         let tr = document.createElement('tr');
         tableBody[0].appendChild(tr);
 
+        /** adding cells */
         let tdAction = document.createElement('td');
         tdAction.appendChild(document.createTextNode(result[i].action));
         tr.appendChild(tdAction);
@@ -691,6 +651,7 @@ function drawHistoryTable(result){
     }
 }
 
+/** Function for checking if value is empty */
 function isEmpty(value) {
     let response = false;
     if (value === '' || value === undefined || value === null || value === ' ') {
